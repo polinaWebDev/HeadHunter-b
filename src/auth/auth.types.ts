@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {User} from "../users/user.entity";
+import {UserDto} from "../users/dto/user.dto";
 
 export class RegisterResponse {
     @ApiProperty({
@@ -16,7 +17,7 @@ export class RegisterResponse {
             avatar_url: 'https://example.com/avatar.jpg',
         },
     })
-    user: User
+    user: UserDto
 }
 
 

@@ -7,6 +7,7 @@ import { LoginDto } from '../users/dto/login-user.dto';
 import {LoginResponse, RegisterResponse} from "./auth.types";
 import {User} from "../users/user.entity";
 import {ApiProperty} from "@nestjs/swagger";
+import {UserDto} from "../users/dto/user.dto";
 
 @Injectable()
 export class AuthService {
@@ -18,18 +19,14 @@ export class AuthService {
     @ApiProperty()
     async register(createUserDto: CreateUserDTO): Promise<RegisterResponse> {
         const { email, password, firstName, lastName, avatar_url, profileType } = createUserDto;
-
         // Проверка на существующего пользователя
         const existingUser = await this.usersService.findByEmail(email);
         if (existingUser) {
             throw new Error('Пользователь уже существует');
         }
-
         console.log('Creating user with data:', { email, firstName, lastName, profileType, avatar_url });
-
         // Хэшируем пароль
         const hashedPassword = await bcrypt.hash(password, 10);
-
         // Создаем нового пользователя
         const user = await this.usersService.createUser(
             email,
@@ -40,18 +37,19 @@ export class AuthService {
             avatar_url
         );
 
+        const userDto: UserDto = {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            avatar_url: user.avatar_url,
+            profileType: user.profileType,
+        };
+
         // Возвращаем объект с ответом на регистрацию
         return {
             token: this.jwtService.sign({ id: user.id, email: user.email }),
-            user: {
-                id: user.id,
-                email: user.email,
-                password: hashedPassword,
-                avatar_url: user.avatar_url,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                profileType: user.profileType
-            },
+            user: userDto,
         };
     }
 

@@ -4,17 +4,25 @@ import {JwtAuthGuard} from "../auth/JwtAuthGuard";
 import {ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiProperty, ApiTags} from "@nestjs/swagger";
 import {User} from "./user.entity";
 import {RequestWithUser} from "../types/RequestWithUser";
-import {UserProfileDto} from "./dto/user-profile.dto";
+import {UserDto} from "./dto/user.dto";
+import {ProfileType} from "../types/profile_type";
 
 @ApiTags("users")
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    @ApiOkResponse({ type: UserProfileDto, description: "Получение профиля пользователя" })
+    @ApiOkResponse({ type: UserDto, description: "Получение профиля пользователя" })
     @Get("profile")
     @UseGuards(JwtAuthGuard)
-    async getProfile(@Req() req: RequestWithUser): Promise<UserProfileDto> {
+    async getProfile(@Req() req: RequestWithUser): Promise<{
+        id: number;
+        firstName: string;
+        email: string;
+        lastName: string;
+        profileType: ProfileType;
+        avatar_url: string | null
+    }> {
         if (!req.user) throw new UnauthorizedException("User not found");
         const user = await this.usersService.findById(req.user.id); // Получаем пользователя из базы
         if (!user) throw new UnauthorizedException("User not found");
@@ -22,9 +30,11 @@ export class UsersController {
             id: user.id,
             firstName: user.firstName,
             email: user.email,
-            lastname: user.lastName,
+            lastName: user.lastName,
             profileType: user.profileType,
-            avatar_url: user.avatar_url,
+            avatar_url: user.avatar_url
+            ? `http://localhost:3000/${user.avatar_url}`
+                : null
         };
     }
 }

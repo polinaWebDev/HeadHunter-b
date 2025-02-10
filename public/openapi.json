@@ -87,7 +87,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfileDto"
+                  "$ref": "#/components/schemas/UserDto"
                 }
               }
             }
@@ -161,35 +161,47 @@
           "profileType"
         ]
       },
-      "User": {
+      "UserDto": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "number"
+            "type": "number",
+            "example": 1,
+            "description": "ID пользователя"
           },
           "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
+            "type": "string",
+            "example": "john@example.com",
+            "description": "Email пользователя"
           },
           "firstName": {
-            "type": "string"
+            "type": "string",
+            "example": "John",
+            "description": "Имя пользователя"
           },
           "lastName": {
-            "type": "string"
+            "type": "string",
+            "example": "John",
+            "description": "Фамилия пользователя"
           },
           "avatar_url": {
-            "type": "string"
+            "type": "string",
+            "example": "123-123.png",
+            "description": "Аватарка пользователя"
           },
           "profileType": {
-            "type": "string"
+            "type": "string",
+            "example": "employer",
+            "description": "Тип профиля",
+            "enum": [
+              "employer",
+              "job_seeker"
+            ]
           }
         },
         "required": [
           "id",
           "email",
-          "password",
           "firstName",
           "lastName",
           "profileType"
@@ -212,7 +224,7 @@
             },
             "allOf": [
               {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/UserDto"
               }
             ]
           }
@@ -257,53 +269,6 @@
         "required": [
           "token",
           "user_id"
-        ]
-      },
-      "UserProfileDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "example": 1,
-            "description": "ID пользователя"
-          },
-          "email": {
-            "type": "string",
-            "example": "john@example.com",
-            "description": "Email пользователя"
-          },
-          "firstName": {
-            "type": "string",
-            "example": "John",
-            "description": "Имя пользователя"
-          },
-          "lastname": {
-            "type": "string",
-            "example": "John",
-            "description": "Фамилия пользователя"
-          },
-          "avatar_url": {
-            "type": "string",
-            "example": "123-123.png",
-            "description": "Аватарка пользователя"
-          },
-          "profileType": {
-            "type": "string",
-            "example": "employer",
-            "description": "Тип профиля",
-            "enum": [
-              "employer",
-              "job_seeker"
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "email",
-          "firstName",
-          "lastname",
-          "avatar_url",
-          "profileType"
         ]
       }
     }

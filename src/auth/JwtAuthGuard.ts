@@ -19,11 +19,16 @@ export class JwtAuthGuard implements CanActivate {
         const token = authHeader.split(' ')[1]
 
         try {
+            console.log("JwtAuthGuard", token);
             const decoded = this.jwtService.verify(token);
+            console.log("Расшифрованный токен", decoded);
+            console.log("JWT_SECRET:", process.env.JWT_SECRET);
             request.user = decoded;
             return true;
         } catch (error) {
+            console.error("Ошибка токена", error);
             throw new UnauthorizedException('Токен недействителен или истёк');
         }
     }
 }
+

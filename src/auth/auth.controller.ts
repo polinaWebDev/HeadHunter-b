@@ -14,51 +14,24 @@ import {AuthService} from "./auth.service";
 @Controller('auth')
 export class AuthController {
     constructor(
-        private readonly usersService: UsersService,
-        private readonly jwtService: JwtService,
         private readonly authService: AuthService,
     ) {}
 
     @Post('register')
-    @UseInterceptors(FileInterceptor('avatar', multerConfig)) // Используем конфиг multer
+    @UseInterceptors(FileInterceptor('avatar', multerConfig))
     @ApiCreatedResponse({ type: RegisterResponse, description: 'Successful registration' })
     async register(
         @Body() createUserDto: CreateUserDTO,
         @UploadedFile() avatar: Express.Multer.File
-    ) {
-
+    ): Promise<RegisterResponse> {
         console.log('Request body:', createUserDto);
         console.log('Avatar file:', avatar);
-        // Деструктурируем данные из DTO
-        const { email, password, firstName, lastName, profileType } = createUserDto;
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Если файл был загружен, сохраняем его путь
         if (avatar) {
-            createUserDto.avatar_url = avatar.path; // Сохраняем путь к файлу в avatar_url
+            createUserDto.avatar_url = avatar.path;
         }
 
-        // Создаем пользователя через сервис
-        const user = await this.usersService.createUser(
-            email,
-            hashedPassword,
-            firstName,
-            lastName,
-            profileType,
-            createUserDto.avatar_url // Передаем путь к аватарке
-        );
-
-        console.log('Created user:', user);
-        // Создаем JWT токен для нового пользователя
-        const token = this.jwtService.sign({ id: user.id, email: user.email });
-
-        // Возвращаем ответ с данными о пользователе и токене
-        return {
-            message: 'User registered successfully',
-            user,
-            token,
-        };
+        return this.authService.register(createUserDto);
     }
 
     @Post('login')

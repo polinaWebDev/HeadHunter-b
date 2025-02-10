@@ -7,11 +7,13 @@ import * as process from "node:process";
 import {ValidationPipe} from "@nestjs/common";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
 import * as fs from "node:fs";
+import * as path from "node:path";
+import {NestExpressApplication} from "@nestjs/platform-express";
 
 
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors({
     origin: '*', // или указывается конкретный домен 'http://localhost:4000'
     methods: ['GET', 'POST'], // Методы
@@ -40,7 +42,11 @@ async function bootstrap() {
 
 
   // Делаем файл доступным по URL
-  app.use('/static', express.static(join(__dirname, '..', 'public')));
+  app.use('/public', express.static(join(__dirname, '..', 'public')));
+
+  app.useStaticAssets(path.join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads',
+  });
 
   await app.listen(process.env.PORT || 3000);
 }

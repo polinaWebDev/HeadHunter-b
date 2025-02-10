@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import {ProfileType} from "../../types/profile_type";
 import {IsEnum} from "class-validator";
 
-export class UserProfileDto {
+export class UserDto {
     @ApiProperty({ example: 1, description: "ID пользователя" })
     id: number;
 
@@ -13,9 +13,9 @@ export class UserProfileDto {
     firstName: string;
 
     @ApiProperty({example: "John", description: "Фамилия пользователя"})
-    lastname: string;
+    lastName: string;
 
-    @ApiProperty({example: "123-123.png" , description: 'Аватарка пользователя'})
+    @ApiProperty({example: "123-123.png" , description: 'Аватарка пользователя', required: false})
     avatar_url?: string;
 
     @ApiProperty({example: "employer",description: 'Тип профиля', enum: ProfileType })
