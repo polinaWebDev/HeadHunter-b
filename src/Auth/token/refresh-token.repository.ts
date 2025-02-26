@@ -21,6 +21,7 @@ export class RefreshTokenRepository {
 
   async deleteRefreshToken(userId: number) {
     await this.refreshTokenRepo.delete({ userId });
+    console.log('delete refresh token');
   }
 
 }

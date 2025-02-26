@@ -6,13 +6,13 @@ import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
-  constructor(private authService: AuthService) {
+  constructor(private readonly authService: AuthService) {
     super();
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    const response: Response = context.switchToHttp().getResponse();
+    const response: Response = context.switchToHttp().getResponse<Response>();
 
     console.log("JwtAuthGuard.canActivate is called!");
 
@@ -21,17 +21,19 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
       return true;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
-        const refreshToken = request.cookies?.refreshToken;
+        console.log('triggered');
+        const oldRefreshToken = request.cookies?.refreshToken;
 
-        if (!refreshToken) {
+        if (!oldRefreshToken) {
           throw new UnauthorizedException("Refresh token is missing");
         }
 
         try {
-          const newTokens = await this.authService.refreshTokens(refreshToken, response);
-          console.log("Новые токены", newTokens)
-          response.cookie('accessToken', newTokens.accessToken, { httpOnly: true });
-          response.cookie('refreshToken', newTokens.refreshToken, { httpOnly: true });
+          const {accessToken, refreshToken} = await this.authService.refreshTokens(oldRefreshToken, response);
+          console.log(accessToken, refreshToken)
+          console.log("Новые токены", accessToken, refreshToken);
+          response.cookie('accessToken', accessToken, { httpOnly: true });
+          response.cookie('refreshToken', refreshToken, { httpOnly: true });
           console.log("New tokens generated and sent.");
           return true;
         } catch (error) {

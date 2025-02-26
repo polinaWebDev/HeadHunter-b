@@ -86,15 +86,26 @@ export class AuthController {
   }
 
 
-  @ApiCreatedResponse({ description: "Successful logout" })
-  @Post("logout")
+  @Post('logout')
+  @ApiCreatedResponse({ description: 'Successful logout' })
   async logout(@Req() req: Request, @Res() res: Response) {
+    console.log('Logout request:', req.cookies);
     const refreshToken = req.cookies?.refreshToken;
-    if (!refreshToken) throw new UnauthorizedException("No refresh token found");
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token found');
+    }
 
-    const payload = this.authService.verifyToken(refreshToken);
-    await this.authService.logout(payload.sub, res);
+    try {
+      console.log(this.authService)
+      const payload = await this.authService.verifyToken(refreshToken);
+      await this.authService.logout(payload.sub, res);
+
+      return res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
+
 
   @ApiCreatedResponse({ type: LoginResponse, description: "Successful token refresh" })
   @Post("refresh")

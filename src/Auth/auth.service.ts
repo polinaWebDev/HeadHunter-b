@@ -9,6 +9,7 @@ import { RefreshTokenRepository } from './token/refresh-token.repository';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { LoginDto } from './dto/login.dto';
+import { JwtPayload } from './token/JwtStrategy';
 
 @Injectable()
 export class AuthService {
@@ -56,9 +57,6 @@ export class AuthService {
   async generateTokens(user: User) {
     const payload = { sub: user.id, email: user.email };
 
-    console.log("JWT_ACCESS_SECRET:", this.configService.get("JWT_ACCESS_SECRET"));
-    console.log("JWT_ACCESS_EXPIRES:", this.configService.get("JWT_ACCESS_EXPIRES"));
-
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get("JWT_ACCESS_SECRET"),
       expiresIn: this.configService.get("JWT_ACCESS_EXPIRES"),
@@ -78,11 +76,10 @@ export class AuthService {
 
 
   async refreshTokens(refreshToken: string, res: Response) {
-    console.log("sssss")
     try {
-      const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get("JWT_REFRESH_SECRET"),
-      });
+      const payload = this.verifyToken(refreshToken);
+
+
 
       const isValid = await this.refreshTokenRepo.validateRefreshToken(payload.sub, refreshToken);
       if (!isValid) throw new ForbiddenException("Invalid refresh token");
@@ -105,10 +102,11 @@ export class AuthService {
     await this.refreshTokenRepo.deleteRefreshToken(userId);
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
+    console.log("Logged out");
     return res.json({ message: "Logged out" });
   }
 
-  public verifyToken(token: string): any {
+  public verifyToken(token: string):any {
     return this.jwtService.verify(token, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
@@ -119,5 +117,4 @@ export class AuthService {
     console.log('Decoded token:', decoded);
     return decoded;
   }
-
 }
